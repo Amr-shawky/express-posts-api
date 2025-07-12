@@ -9,6 +9,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -214,6 +215,35 @@ app.get('/posts', async (req, res) => {
   }
 });
 
+// - **GET `/posts/export`** — Export all posts to a text file
+
+//{
+ //   "error": "Cast to ObjectId failed for value \"export\" (type string) at path \"_id\" for model \"Post\""
+//}
+//ReferenceError: require is not defined<br> &nbsp; &nbsp;at file:///F:/Courses/NTI/express-posts-api/app.js:224:14
+
+app.get('/posts/export', async (_, res) => {
+  const filePath = 'posts.txt';
+  
+  try {
+    const cursor = Post.find().populate('author', 'name').cursor();
+    const writeStream = fs.createWriteStream(filePath);
+    
+    for await (const post of cursor) {
+      const line = `Title: ${post.title}, Author: ${post.author.name}\n`;
+      writeStream.write(line);
+    }
+    
+    writeStream.end();
+    writeStream.on('finish', () => {
+      res.send(`Export finished, file saved as ${filePath}`);
+    });
+    
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // get a post by id
 app.get('/posts/:id', async (req, res) => {
   try {
@@ -237,29 +267,7 @@ app.post('/posts', async (req, res) => {
     res.status(400).json({ error: err.message });  
   }  
 });
-// - **GET `/posts/export`** — Export all posts to a text file
-app.get('/posts/export', async (req, res) => {
-  const fs = require('fs');
-  const filePath = 'posts.txt';
-  
-  try {
-    const cursor = Post.find().populate('author', 'name').cursor();
-    const writeStream = fs.createWriteStream(filePath);
-    
-    for await (const post of cursor) {
-      const line = `Title: ${post.title}, Author: ${post.author.name}\n`;
-      writeStream.write(line);
-    }
-    
-    writeStream.end();
-    writeStream.on('finish', () => {
-      res.send(`Export finished, file saved as ${filePath}`);
-    });
-    
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
