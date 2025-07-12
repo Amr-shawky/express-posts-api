@@ -1,0 +1,22 @@
+# Node modules (never push this!)
+node_modules/
+
+# Environment variable files (often contain secrets)
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS-specific files
+.DS_Store
+
+# IDE/editor settings (optional, but good practice)
+.vscode/
+.idea/
+
+# Dependency lockfiles (optional, but commonly included in teams)
+# Uncomment if you don’t want to push lockfiles
+# package-lock.json
+# yarn.lock
